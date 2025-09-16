@@ -3,10 +3,6 @@ import os
 
 app = Flask(__name__)
 
-@app.route("/health")
-def health():
-    return "✅ Server is alive"
-
 SANCTIONS = {"0x1234abcd5678efgh", "0x9999ffff0000eeee"}
 
 @app.route("/")
