@@ -1,9 +1,15 @@
 from flask import Flask, request, jsonify
+import os
 
 app = Flask(__name__)
 
-# 임시 제재 리스트 (나중에 sanctions.json으로 교체 가능)
+# 임시 제재 리스트
 SANCTIONS = {"0x1234abcd5678efgh", "0x9999ffff0000eeee"}
+
+# ✅ 루트 경로 추가 (여기 때문에 / 들어가면 Not Found 안 뜸)
+@app.route("/")
+def home():
+    return jsonify({"message": "DarkScan Backend API is running."})
 
 @app.route("/check")
 def check_wallet():
@@ -17,7 +23,5 @@ def check_wallet():
         return jsonify({"status": "safe", "message": "🟢 안전 주소"})
 
 if __name__ == "__main__":
-    # Render는 PORT 환경변수를 씀 → 없으면 5000번
-    import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
