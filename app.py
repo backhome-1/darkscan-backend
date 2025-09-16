@@ -1,63 +1,29 @@
-from flask import Flask, request, Response
+from flask import Flask, request, jsonify
 from flask_cors import CORS
-import json
-import os
 
 app = Flask(__name__)
+CORS(app)  # 모든 Origin 허용
 
-# 🔓 CORS 완전 허용
-CORS(
-    app,
-    resources={r"/*": {"origins": "*"}},
-    supports_credentials=True,
-    allow_headers="*",
-    methods=["GET", "POST", "OPTIONS"]
-)
-
-@app.route("/", methods=["GET"])
+@app.route("/")
 def home():
-    return Response(
-        json.dumps({"message": "DarkScan Backend API is running."}, ensure_ascii=False),
-        content_type="application/json; charset=utf-8"
-    )
+    return {"status": "ok", "message": "DarkScan backend running"}
 
-@app.route("/check", methods=["GET"])
-def check_wallet():
-    addr = request.args.get("addr", "").strip()
+@app.route("/analyze", methods=["POST"])
+def analyze():
+    data = request.get_json()
+    address = data.get("address", "").strip()
 
-    if not addr:
-        return Response(
-            json.dumps({"message": "❌ 주소를 입력하세요", "status": "error"}, ensure_ascii=False),
-            content_type="application/json; charset=utf-8",
-            status=400
-        )
+    if not address:
+        return jsonify({"error": "No address provided"}), 400
 
-    # 🚨 샘플 제재 리스트 (실제로는 DB/실시간 API 연동 가능)
-    blacklist = {
-        "0x1234abcd5678efgh",  # ETH
-        "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7k3l9y0r",  # BTC
-        "TXYZ1234567890ABCDE"  # TRON
+    # --- 여기서 실제 Risk 분석 로직 추가 가능 ---
+    # 지금은 더미 데이터 예시
+    result = {
+        "address": address,
+        "status": "risky" if address.startswith("1Boat") else "clean",
+        "message": "⚠️ 위험 주소" if address.startswith("1Boat") else "✅ 정상 주소"
     }
-
-    if addr in blacklist:
-        return Response(
-            json.dumps({
-                "message": "⚠️ 위험 주소",
-                "status": "risky",
-                "detected_chain": "auto-detect"
-            }, ensure_ascii=False),
-            content_type="application/json; charset=utf-8"
-        )
-
-    return Response(
-        json.dumps({
-            "message": "🟢 안전 주소",
-            "status": "safe",
-            "detected_chain": "auto-detect"
-        }, ensure_ascii=False),
-        content_type="application/json; charset=utf-8"
-    )
+    return jsonify(result)
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=10000)
