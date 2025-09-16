@@ -3,10 +3,12 @@ import os
 
 app = Flask(__name__)
 
-# 임시 제재 리스트
+@app.route("/health")
+def health():
+    return "✅ Server is alive"
+
 SANCTIONS = {"0x1234abcd5678efgh", "0x9999ffff0000eeee"}
 
-# ✅ 루트 경로 추가 (여기 때문에 / 들어가면 Not Found 안 뜸)
 @app.route("/")
 def home():
     return jsonify({"message": "DarkScan Backend API is running."})
@@ -16,11 +18,9 @@ def check_wallet():
     addr = request.args.get("addr", "").strip()
     if not addr:
         return jsonify({"status": "error", "message": "주소가 없음"})
-
     if addr in SANCTIONS:
         return jsonify({"status": "risky", "message": "⚠️ 위험 주소"})
-    else:
-        return jsonify({"status": "safe", "message": "🟢 안전 주소"})
+    return jsonify({"status": "safe", "message": "🟢 안전 주소"})
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
