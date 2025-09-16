@@ -269,3 +269,10 @@ bootstrap()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=PORT)
+
+from flask import Flask
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)  # 모든 도메인 허용
+
